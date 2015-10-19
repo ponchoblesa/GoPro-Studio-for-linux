@@ -4,6 +4,10 @@ CAMERA_DIR="/media/poncho/BF2F-7465"
 DEST_DIR="/media/poncho/Elements/GoPro"
 OVERWRITE_FILES=false
 
+DATE="2015-10-15"
+GET_TIMELAPSE=true
+GET_PHOTOS=true
+GET_VIDEOS=true
 
 DATE_RETURN=""
 declare -a LAPSES_RETURN=()
@@ -81,6 +85,65 @@ copy_files() {
 }
 
 
+######## REFACTOR ######
+
+process_timelapse_files() {
+	get_lapse_num "./"
+	for k in "${LAPSES_RETURN[@]}";
+	do
+		echo "Getting Timelapse $k pictures"
+
+		get_date G"$k"*.JPG
+		mkdir -p "$DEST_DIR/$DATE_RETURN"
+		mkdir -p "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+		
+		echo "Copying files from G$k*.JPG to $DEST_DIR/$DATE_RETURN/Timelapse_$k"
+		copy_files "G$k*.JPG" "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+	done
+}
+
+process_photo_files() {
+	get_pictures_list "./"
+	for k in "${PICTURES_LIST_RETURN[@]}";
+	do
+		get_date "$k"
+		mkdir -p "$DEST_DIR/$DATE_RETURN"
+		mkdir -p "$DEST_DIR/$DATE_RETURN/Photos"
+		
+		echo "Copying picture $k to $DEST_DIR/$DATE_RETURN/Photos"
+		copy_files "$k" "$DEST_DIR/$DATE_RETURN/Photos"
+	done
+}
+
+process_video_files() {
+	get_video_list "./"
+	for k in "${VIDEO_LIST_RETURN[@]}";
+	do
+		get_date "$k"
+		mkdir -p "$DEST_DIR/$DATE_RETURN"
+		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
+		
+		echo "Copying video $k to $DEST_DIR/$DATE_RETURN/Videos"
+		copy_files "$k" "$DEST_DIR/$DATE_RETURN/Videos"
+	done
+}
+
+process_chaptered_video_files() {
+	get_chapter_video_num "./"
+	for k in "${CHAPTER_RETURN[@]}";
+	do
+		echo "Getting chapters of video $k"
+
+		get_date GP*"$k".MP4
+		mkdir -p "$DEST_DIR/$DATE_RETURN"
+		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
+		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos/$k"
+		
+		echo "Copying files from GP*$k.MP4 to $DEST_DIR/$DATE_RETURN/Videos/$k"
+		copy_files "GP*$k.MP4" "$DEST_DIR/$DATE_RETURN/Videos/$k"
+	done
+}
+
 mkdir -p $DEST_DIR
 get_folders_list "$CAMERA_DIR/*"
 first_level=("${FOLDERS_LIST_RETURN[@]}")
@@ -98,59 +161,18 @@ for i in "${first_level[@]}";
 			echo "Working path $current_full_path"
 
 			##Timelapse pictures
-			get_lapse_num "./"
-			for k in "${LAPSES_RETURN[@]}";
-			do
-				echo "Getting Timelapse $k pictures"
-
-				get_date G"$k"*.JPG
-				mkdir -p "$DEST_DIR/$DATE_RETURN"
-				mkdir -p "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
-				
-				echo "Copying files from G$k*.JPG to $DEST_DIR/$DATE_RETURN/Timelapse_$k"
-				copy_files "G$k*.JPG" "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
-			done
+			process_timelapse_files
 
 			##Single pictures
 			echo "Copying pictures from $current_full_path"
-			get_pictures_list "./"
-			for k in "${PICTURES_LIST_RETURN[@]}";
-			do
-				get_date "$k"
-				mkdir -p "$DEST_DIR/$DATE_RETURN"
-				mkdir -p "$DEST_DIR/$DATE_RETURN/Photos"
-				
-				echo "Copying picture $k to $DEST_DIR/$DATE_RETURN/Photos"
-				copy_files "$k" "$DEST_DIR/$DATE_RETURN/Photos"
-			done
+			process_photo_files
 
 			##Single videos
 			echo "Copying videos from $current_full_path"
-			get_video_list "./"
-			for k in "${VIDEO_LIST_RETURN[@]}";
-			do
-				get_date "$k"
-				mkdir -p "$DEST_DIR/$DATE_RETURN"
-				mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
-				
-				echo "Copying video $k to $DEST_DIR/$DATE_RETURN/Videos"
-				copy_files "$k" "$DEST_DIR/$DATE_RETURN/Videos"
-			done
+			process_video_files
 
 			##Chaptered Video
-			get_chapter_video_num "./"
-			for k in "${CHAPTER_RETURN[@]}";
-			do
-				echo "Getting chapters of video $k"
-
-				get_date GP*"$k".MP4
-				mkdir -p "$DEST_DIR/$DATE_RETURN"
-				mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
-				mkdir -p "$DEST_DIR/$DATE_RETURN/Videos/$k"
-				
-				echo "Copying files from GP*$k.MP4 to $DEST_DIR/$DATE_RETURN/Videos/$k"
-				copy_files "GP*$k.MP4" "$DEST_DIR/$DATE_RETURN/Videos/$k"
-			done
+			
 
 		done
 
