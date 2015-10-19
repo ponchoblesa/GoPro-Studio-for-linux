@@ -64,11 +64,10 @@ get_chapter_video_num() {
 # $1=DIR
 get_folders_list() {
 	FOLDERS_LIST_RETURN=()
-	cd "$1"
 
-	local subdircount=`find "$1" -maxdepth 1 -type d | wc -l`
-	if [ $subdircount -ne 1 ]; then
-	    FOLDERS_LIST_RETURN+=($(ls -d *))
+	local folder_match=$(eval echo "$1" | head -n1 | awk '{print $1;}')
+	if [ -d $folder_match ]; then
+		FOLDERS_LIST_RETURN+=($(eval ls -d "$1"))
 	fi
 }
 
@@ -83,12 +82,12 @@ copy_files() {
 
 
 mkdir -p $DEST_DIR
-get_folders_list "$CAMERA_DIR"
+get_folders_list "$CAMERA_DIR/*"
 first_level=("${FOLDERS_LIST_RETURN[@]}")
 
 for i in "${first_level[@]}";
 	do
-		get_folders_list "$CAMERA_DIR/$i"
+		get_folders_list "$CAMERA_DIR/$i/*"
 		second_level=("${FOLDERS_LIST_RETURN[@]}")
 
 		#Foreach folder with media files
