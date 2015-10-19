@@ -4,7 +4,7 @@ CAMERA_DIR="/media/poncho/BF2F-7465"
 DEST_DIR="/media/poncho/Elements/GoPro"
 OVERWRITE_FILES=false
 
-DATE="2015-10-15"
+DATE="*" #Date pattern yyyy-mm-dd. Exp1: 2015-10-15 (Only files of that day). Exp2: 2015-11-* (All the files of November). Exp3: * (All the files regardless the date)
 GET_TIMELAPSE=true
 GET_PHOTOS=true
 GET_VIDEOS=true
@@ -84,21 +84,22 @@ copy_files() {
 	fi
 }
 
-
 ######## REFACTOR ######
 
 process_timelapse_files() {
 	get_lapse_num "./"
 	for k in "${LAPSES_RETURN[@]}";
 	do
-		echo "Getting Timelapse $k pictures"
-
 		get_date G"$k"*.JPG
-		mkdir -p "$DEST_DIR/$DATE_RETURN"
-		mkdir -p "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
 		
-		echo "Copying files from G$k*.JPG to $DEST_DIR/$DATE_RETURN/Timelapse_$k"
-		copy_files "G$k*.JPG" "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+		if [[ $DATE_RETURN == $DATE ]]; then
+			echo "Getting Timelapse $k pictures of $DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+			echo "Copying files from G$k*.JPG to $DEST_DIR/$DATE_RETURN/Timelapse_$k"
+			copy_files "G$k*.JPG" "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+		fi		
+		
 	done
 }
 
@@ -107,11 +108,12 @@ process_photo_files() {
 	for k in "${PICTURES_LIST_RETURN[@]}";
 	do
 		get_date "$k"
-		mkdir -p "$DEST_DIR/$DATE_RETURN"
-		mkdir -p "$DEST_DIR/$DATE_RETURN/Photos"
-		
-		echo "Copying picture $k to $DEST_DIR/$DATE_RETURN/Photos"
-		copy_files "$k" "$DEST_DIR/$DATE_RETURN/Photos"
+		if [[ $DATE_RETURN == $DATE ]]; then
+			mkdir -p "$DEST_DIR/$DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN/Photos"			
+			echo "Copying picture $k of $DATE_RETURN to $DEST_DIR/$DATE_RETURN/Photos"
+			copy_files "$k" "$DEST_DIR/$DATE_RETURN/Photos"
+		fi
 	done
 }
 
@@ -120,11 +122,12 @@ process_video_files() {
 	for k in "${VIDEO_LIST_RETURN[@]}";
 	do
 		get_date "$k"
-		mkdir -p "$DEST_DIR/$DATE_RETURN"
-		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
-		
-		echo "Copying video $k to $DEST_DIR/$DATE_RETURN/Videos"
-		copy_files "$k" "$DEST_DIR/$DATE_RETURN/Videos"
+		if [[ $DATE_RETURN == $DATE ]]; then
+			mkdir -p "$DEST_DIR/$DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"		
+			echo "Copying video $k of $DATE_RETURN to $DEST_DIR/$DATE_RETURN/Videos"
+			copy_files "$k" "$DEST_DIR/$DATE_RETURN/Videos"
+		fi
 	done
 }
 
@@ -132,15 +135,15 @@ process_chaptered_video_files() {
 	get_chapter_video_num "./"
 	for k in "${CHAPTER_RETURN[@]}";
 	do
-		echo "Getting chapters of video $k"
-
 		get_date GP*"$k".MP4
-		mkdir -p "$DEST_DIR/$DATE_RETURN"
-		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
-		mkdir -p "$DEST_DIR/$DATE_RETURN/Videos/$k"
-		
-		echo "Copying files from GP*$k.MP4 to $DEST_DIR/$DATE_RETURN/Videos/$k"
-		copy_files "GP*$k.MP4" "$DEST_DIR/$DATE_RETURN/Videos/$k"
+		if [[ $DATE_RETURN == $DATE ]]; then
+			echo "Getting chapters of video $k of $DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN"
+			mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"
+			mkdir -p "$DEST_DIR/$DATE_RETURN/Videos/$k"	
+			echo "Copying files from GP*$k.MP4 to $DEST_DIR/$DATE_RETURN/Videos/$k"
+			copy_files "GP*$k.MP4" "$DEST_DIR/$DATE_RETURN/Videos/$k"
+		fi
 	done
 }
 
@@ -150,28 +153,33 @@ first_level=("${FOLDERS_LIST_RETURN[@]}")
 
 for i in "${first_level[@]}";
 	do
-		get_folders_list "$CAMERA_DIR/$i/*"
+		get_folders_list "$i/*"
 		second_level=("${FOLDERS_LIST_RETURN[@]}")
 
 		#Foreach folder with media files
 		for j in "${second_level[@]}"; do
-			echo "Getting files from dir $j...."			
-			current_full_path="$CAMERA_DIR/$i$j"			
-			cd "$current_full_path"
-			echo "Working path $current_full_path"
+			echo "Checking files in $j"
+			cd "$j"
 
 			##Timelapse pictures
-			process_timelapse_files
+			if [ "$GET_TIMELAPSE" = true ]; then
+				process_timelapse_files
+			fi
 
 			##Single pictures
-			echo "Copying pictures from $current_full_path"
-			process_photo_files
+			if [ "$GET_PHOTOS" = true ]; then
+				echo "Copying pictures from $j"
+				process_photo_files
+			fi
 
-			##Single videos
-			echo "Copying videos from $current_full_path"
-			process_video_files
+			if [ "$GET_VIDEOS" = true ]; then
+				##Single videos
+				echo "Copying videos from $j"
+				process_video_files
 
-			##Chaptered Video
+				##Chaptered Video
+				process_chaptered_video_files
+			fi
 			
 
 		done
