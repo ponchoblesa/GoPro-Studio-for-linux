@@ -84,6 +84,18 @@ copy_files() {
 	fi
 }
 
+# $1=SourceFolder $2=DestFolder $3=Pattern
+set_date_to_files () {
+	local declare file_list=()
+
+	cd "$1"
+	file_list+=($(eval ls "$3" | sort | uniq))
+
+	for i in "${file_list[@]}"; do
+		touch -r "$i" "$2/$i"
+	done
+}
+
 ######## REFACTOR ######
 
 process_timelapse_files() {
@@ -98,6 +110,7 @@ process_timelapse_files() {
 			mkdir -p "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
 			echo "Copying files from G$k*.JPG to $DEST_DIR/$DATE_RETURN/Timelapse_$k"
 			copy_files "G$k*.JPG" "$DEST_DIR/$DATE_RETURN/Timelapse_$k"
+			set_date_to_files "./" "$DEST_DIR/$DATE_RETURN/Timelapse_$k" "G$k*.JPG"
 		fi		
 		
 	done
@@ -113,6 +126,7 @@ process_photo_files() {
 			mkdir -p "$DEST_DIR/$DATE_RETURN/Photos"			
 			echo "Copying picture $k of $DATE_RETURN to $DEST_DIR/$DATE_RETURN/Photos"
 			copy_files "$k" "$DEST_DIR/$DATE_RETURN/Photos"
+			set_date_to_files "./" "$DEST_DIR/$DATE_RETURN/Photos" "$k"
 		fi
 	done
 }
@@ -127,6 +141,7 @@ process_video_files() {
 			mkdir -p "$DEST_DIR/$DATE_RETURN/Videos"		
 			echo "Copying video $k of $DATE_RETURN to $DEST_DIR/$DATE_RETURN/Videos"
 			copy_files "$k" "$DEST_DIR/$DATE_RETURN/Videos"
+			set_date_to_files "./" "$DEST_DIR/$DATE_RETURN/Videos" "$k"
 		fi
 	done
 }
@@ -143,45 +158,44 @@ process_chaptered_video_files() {
 			mkdir -p "$DEST_DIR/$DATE_RETURN/Videos/$k"	
 			echo "Copying files from GP*$k.MP4 to $DEST_DIR/$DATE_RETURN/Videos/$k"
 			copy_files "GP*$k.MP4" "$DEST_DIR/$DATE_RETURN/Videos/$k"
+			set_date_to_files "./" "$DEST_DIR/$DATE_RETURN/Videos/$k" "GP*$k.MP4"
 		fi
 	done
 }
+
+######## MAIN ######
 
 mkdir -p $DEST_DIR
 get_folders_list "$CAMERA_DIR/*"
 first_level=("${FOLDERS_LIST_RETURN[@]}")
 
-for i in "${first_level[@]}";
-	do
-		get_folders_list "$i/*"
-		second_level=("${FOLDERS_LIST_RETURN[@]}")
+for i in "${first_level[@]}"; do
+	get_folders_list "$i/*"
+	second_level=("${FOLDERS_LIST_RETURN[@]}")
 
-		#Foreach folder with media files
-		for j in "${second_level[@]}"; do
-			echo "Checking files in $j"
-			cd "$j"
+	#Foreach folder with media files
+	for j in "${second_level[@]}"; do
+		echo "Checking files in $j"
+		cd "$j"
 
-			##Timelapse pictures
-			if [ "$GET_TIMELAPSE" = true ]; then
-				process_timelapse_files
-			fi
+		##Timelapse pictures
+		if [ "$GET_TIMELAPSE" = true ]; then
+			process_timelapse_files
+		fi
 
-			##Single pictures
-			if [ "$GET_PHOTOS" = true ]; then
-				echo "Copying pictures from $j"
-				process_photo_files
-			fi
+		##Single pictures
+		if [ "$GET_PHOTOS" = true ]; then
+			echo "Checking pictures from $j"
+			process_photo_files
+		fi
 
-			if [ "$GET_VIDEOS" = true ]; then
-				##Single videos
-				echo "Copying videos from $j"
-				process_video_files
+		if [ "$GET_VIDEOS" = true ]; then
+			##Single videos
+			echo "Checking videos from $j"
+			process_video_files
 
-				##Chaptered Video
-				process_chaptered_video_files
-			fi
-			
-
-		done
-
+			##Chaptered Video
+			process_chaptered_video_files
+		fi			
+	done
 done
