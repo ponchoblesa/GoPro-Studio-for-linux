@@ -1,12 +1,17 @@
 #!/bin/bash
 
 MEDIA_DIR="/media/poncho/Elements/GoPro/2015-*"
+
+COLLAGE=true
+FISHEYE=true
+
+TIMELAPSE=true
 DEFAULT_FPS=true
+FPS_SLOW=0
+FPS_FAST=0
 
 
 declare -a FOLDERS_LIST_RETURN=()
-FPS_SLOW=0
-FPS_FAST=0
 
 # $1=DIR
 get_folders_list() {
@@ -125,12 +130,15 @@ for i in "${first_level[@]}"; do
 				fi
 
 				if [[ "$files_num" -gt 1000 ]]; then
-					echo "Doing collage for more than 1000 pictures..."
-					process_collage "$tl_num" "G*000.JPG" "G*500.JPG"
-					
+					if "$COLLAGE"; then
+						echo "Doing collage for more than 1000 pictures..."
+						process_collage "$tl_num" "G*000.JPG" "G*500.JPG"
+					fi
 				else
-					echo "Doing collage for more than 100 pictures..."
-					process_collage "$tl_num" "G*00.JPG" "G*50.JPG"
+					if "$COLLAGE"; then
+						echo "Doing collage for more than 100 pictures..."
+						process_collage "$tl_num" "G*00.JPG" "G*50.JPG"
+					fi
 				fi
 				
 			else
@@ -139,28 +147,33 @@ for i in "${first_level[@]}"; do
 					FPS_SLOW=3
 					FPS_FAST=5
 				fi
-				echo "Doing collage for less than 100 pictures..."
-				process_collage "$tl_num" "G*0.JPG" "G*5.JPG"
+				if "$COLLAGE"; then
+					echo "Doing collage for less than 100 pictures..."
+					process_collage "$tl_num" "G*0.JPG" "G*5.JPG"
+				fi
 			fi
 
-			ls G*.JPG -1tr | sort > gopro.txt
-			mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect:vqscale=3 -vf scale=1920:1080 -mf type=jpeg:fps="$FPS_SLOW" mf://@gopro.txt -o "$tl_num"_FPS"$FPS_SLOW".mp4
-			mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect:vqscale=3 -vf scale=1920:1080 -mf type=jpeg:fps="$FPS_FAST" mf://@gopro.txt -o "$tl_num"_FPS"$FPS_FAST".mp4
-			set_date_of_file "G*.JPG" "$tl_num"_FPS"$FPS_SLOW".mp4 "$tl_num"_FPS"$FPS_FAST".mp4
-			rm gopro.txt
-
+			if "$TIMELAPSE"; then
+				ls G*.JPG -1tr | sort > gopro.txt
+				mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect:vqscale=3 -vf scale=1920:1080 -mf type=jpeg:fps="$FPS_SLOW" mf://@gopro.txt -o "$tl_num"_FPS"$FPS_SLOW".mp4
+				mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect:vqscale=3 -vf scale=1920:1080 -mf type=jpeg:fps="$FPS_FAST" mf://@gopro.txt -o "$tl_num"_FPS"$FPS_FAST".mp4
+				set_date_of_file "G*.JPG" "$tl_num"_FPS"$FPS_SLOW".mp4 "$tl_num"_FPS"$FPS_FAST".mp4
+				echo "TIMELAPSE"
+				rm gopro.txt
+			fi
 		fi
 
 		if is_photo "$j"; then
-			cd "$j"
-			mkdir -p without_fisheye
-			cp -n ./*.JPG ./without_fisheye
-			cd ./without_fisheye
-			echo "Removing fisheye..."
-			mogrify -distort barrel "0 0 -0.3" *.JPG
-			set_date_to_edited_photos "$j" "$j/without_fisheye"
-		fi
-	
+			if "$FISHEYE"; then
+				cd "$j"
+				mkdir -p without_fisheye
+				cp -n ./*.JPG ./without_fisheye
+				cd ./without_fisheye
+				echo "Removing fisheye..."
+				mogrify -distort barrel "0 0 -0.3" *.JPG
+				set_date_to_edited_photos "$j" "$j/without_fisheye"
+			fi			
+		fi	
 	done
 done
 
