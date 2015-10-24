@@ -4,7 +4,7 @@ This repository contains some bash scripts to process your GoPro media files (.J
 
 Download the repository and start using it
 
-   git clone [link of the repo]
+   git clone https://github.com/ponchoblesa/GoPro-Studio-for-linux.git
 
 ## Import
 
