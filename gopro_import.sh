@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CAMERA_DIR="/media/poncho/BF2F-7465"
-DEST_DIR="/media/poncho/Elements/GoPro"
+CAMERA_DIR="/media/user/MyCard"
+DEST_DIR="~/GoPro"
 OVERWRITE_FILES=false
 
 DATE="*" #Date pattern yyyy-mm-dd. Exp1: 2015-10-15 (Only files of that day). Exp2: 2015-11-* (All the files of November). Exp3: * (All the files regardless the date)

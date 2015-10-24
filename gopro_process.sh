@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MEDIA_DIR="/media/poncho/Elements/GoPro/2015-*"
+MEDIA_DIR="~/GoPro/*"
 
 COLLAGE=true
 FISHEYE=true
