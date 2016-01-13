@@ -39,7 +39,11 @@ Also total unattended and customizable. It will process you local GoPro files wi
 ### Requirements
 
 * [ImageMagick](http://www.imagemagick.org/script/index.php): sudo apt-get install imagemagick
-* [MenCoder](https://help.ubuntu.com/community/MEncoder): sudo apt-get install mencoder 
+* [MenCoder](https://help.ubuntu.com/community/MEncoder): sudo apt-get install mencoder
+* [HandBrake CLI](https://handbrake.fr/downloads2.php): Download/Upgrade it from this repository:
+		sudo apt-add-repository ppa:stebbins/handbrake-snapshots
+		sudo apt-get update
+		apt-get install --only-upgrade handbrake-cli
 
 ### Usage
 
@@ -52,8 +56,11 @@ Open the script and customize the vars:
 
 	COLLAGE=true				// Set to false if you do not want to run a particular feature
 	FISHEYE=true
-	TIMELAPSE=true
+	VIDEO=true
 
+	VIDEO_DEVICE_OPTIMIZED=true
+	
+	TIMELAPSE=true
 	DEFAULT_FPS=true			// Set it to false if you want to customize the frames per second
 	FPS_SLOW=0						of the timelapse video. Then change the zero value for the two desired
 	FPS_FAST=0						fps values for the videos.
@@ -87,6 +94,18 @@ With the pictures of the timelapse, it will create 4 collages of two different c
 It will create a folder inside the photos path with the edited pictures. The script is optimized for GoPro Hero3+. If you want to change these parameters, edit the line of the script with the desire parameters:
 
     mogrify -distort barrel "0 0 -0.3" *.JPG 
+
+#### Video merger and compression
+
+	VIDEO=true
+
+It will merge in one all the videos of each day. The result will be a single file [date].mp4 with all the videos of these day in chronological order.
+
+	VIDEO_DEVICE_OPTIMIZED=true
+
+This video is compressed in order to get a lighter file with almost the same video quality. If the variable "VIDEO_DEVICE_OPTIMIZED" is true, it will also crop its resolution optimized for device, giving as a result an even lighter video which display perfectly in every device. Otherwise, the resolution will be bigger and optimized for big screens.
+
+For compression is used a preset of Handbrake a bit modified. If you want to change this default behaviour, take a look to the [documentation of Handbrake CLI](https://trac.handbrake.fr/wiki/BuiltInPresets) and edit the variable $handbrake_opts of the script.
 
 ## Acknowledge
 
