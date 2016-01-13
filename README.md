@@ -41,6 +41,7 @@ Also total unattended and customizable. It will process you local GoPro files wi
 * [ImageMagick](http://www.imagemagick.org/script/index.php): sudo apt-get install imagemagick
 * [MenCoder](https://help.ubuntu.com/community/MEncoder): sudo apt-get install mencoder
 * [HandBrake CLI](https://handbrake.fr/downloads2.php): Download/Upgrade it from this repository:
+
 		sudo apt-add-repository ppa:stebbins/handbrake-snapshots
 		sudo apt-get update
 		apt-get install --only-upgrade handbrake-cli
