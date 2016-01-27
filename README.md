@@ -34,12 +34,15 @@ Then save it and execute it from terminal
 
 ## Process
 
-Also total unattended and customizable. It will process you local GoPro files with some common features.
+Also total unattended and customizable. It will process you local GoPro files with some common features. It will process folder by folder, but creating threads of processing. So depending on the amount of files and the feature, the process will take advantage of all the capabilities of your computer in order to perform all the features as faster as possible. For this reason, my advice is to not to run any other thing while running this script.
+
+In the case of wanting to kill the process, press ctrl+c as many time as needed until all threads are killed properly.
 
 ### Requirements
 
 * [ImageMagick](http://www.imagemagick.org/script/index.php): sudo apt-get install imagemagick
 * [MenCoder](https://help.ubuntu.com/community/MEncoder): sudo apt-get install mencoder
+* [Ffmpeg](https://ffmpeg.org/): Follow instructions in the website to install
 * [HandBrake CLI](https://handbrake.fr/downloads2.php): Download/Upgrade it from this repository:
 
 		sudo apt-add-repository ppa:stebbins/handbrake-snapshots
@@ -107,6 +110,27 @@ It will merge in one all the videos of each day. The result will be a single fil
 This video is compressed in order to get a lighter file with almost the same video quality. If the variable "VIDEO_DEVICE_OPTIMIZED" is true, it will also crop its resolution optimized for device, giving as a result an even lighter video which display perfectly in every device. Otherwise, the resolution will be bigger and optimized for big screens.
 
 For compression is used a preset of Handbrake a bit modified. If you want to change this default behaviour, take a look to the [documentation of Handbrake CLI](https://trac.handbrake.fr/wiki/BuiltInPresets) and edit the variable $handbrake_opts of the script.
+
+In the case of interrupting this process abruptly, a temp folder inside the video folder could remain. Delete from this temp folder all the files which have a creation date of the same day of execution of the script, and run the script again. If you are not quite sure of which files should be deleted, remove the entire folder manually and run it again.
+
+##### Merge mixing videos and timelapse
+
+This feature allows to include in the final video the desires timelapse videos. It will work only if the timelapse where created also with this script and following the naming convention. In order to use that, just copy to the "Videos" folder the timelapse videos you would like to include in your merged video.
+
+Example of content in the video folder:
+
+		~/GoPro/2015-10-16/Videos$ ls -lrt
+
+		oct 16 00:59 GOPR5342.MP4
+		oct 16 11:53 GOPR6872.MP4
+		oct 16 12:42 003_FPS5.mp4
+		oct 16 13:27 GOPR9689.MP4
+		oct 16 13:48 012_FPS20.mp4
+		oct 16 17:20 028_FPS10.mp4
+		oct 16 22:20 GOPR4544.MP4
+		oct 16 22:24 005_FPS3.mp4
+
+Running the script with these files will give you a video named 2015-10-16.mp4 with all these videos merged in chronological order.
 
 ## Acknowledge
 
